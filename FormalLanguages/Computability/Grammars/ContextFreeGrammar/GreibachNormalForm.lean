@@ -28,18 +28,15 @@ def is_greibach_normal_form {T : Type} (g : ContextFreeGrammar T) : Prop :=
 
 theorem greibach_normal_form_nonempty {T : Type} (g : ContextFreeGrammar T) :
     is_greibach_normal_form g → [] ∉ g.language := by
-  intro hgnf hempty
+  rintro hgnf hempty
   have hder : g.Derives [Symbol.nonterminal g.initial] [] := by simpa using hempty
-  cases hder.eq_or_tail with
-  | inl => contradiction
-  | inr h =>
-      obtain ⟨v, ⟨hd, hv⟩⟩ := h
-      obtain ⟨r, ⟨hrule, hrewrites⟩⟩ := hv
-      have : r.output = [] := by
-        rw [ContextFreeRule.rewrites_iff] at hrewrites
-        rcases hrewrites with ⟨p, q, _, h⟩
-        have hparts := by simpa using h
-        exact hparts.2.1
-      obtain ⟨t, ns, houtput⟩ := hgnf r hrule
-      rw [this] at houtput
-      contradiction
+  rcases hder.eq_or_tail with h | ⟨v, ⟨_, ⟨r, ⟨hrule, hrewrites⟩⟩⟩⟩
+  · contradiction
+  have : r.output = [] := by
+    rw [ContextFreeRule.rewrites_iff] at hrewrites
+    rcases hrewrites with ⟨p, q, _, h⟩
+    have hparts := by simpa using h
+    exact hparts.2.1
+  obtain ⟨t, ns, houtput⟩ := hgnf r hrule
+  rw [this] at houtput
+  contradiction
